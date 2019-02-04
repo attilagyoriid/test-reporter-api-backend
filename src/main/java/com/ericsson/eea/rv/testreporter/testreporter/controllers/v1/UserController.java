@@ -9,6 +9,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
+
 @Slf4j
 @RestController
 @RequestMapping(UserController.BASE_URL)
@@ -41,15 +43,8 @@ public class UserController {
         return this.userService.findUserByUsername(username);
     }
 
-    @PreAuthorize("hasRole('USER')")
-    @GetMapping("username/test")
-    @ResponseStatus(HttpStatus.OK)
-    public String test() {
-        return "works";
-    }
-
-    @PreAuthorize("hasRole('USER') or hasRole('READER') or hasRole('EVALUATOR')")
-    @GetMapping("username/userDetails")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('READER') or hasRole('EVALUATOR')")
+    @GetMapping("/account")
     @ResponseStatus(HttpStatus.OK)
     public User getUserDetails(Authentication principal) {
         if (principal.getPrincipal() == null) {
@@ -57,6 +52,13 @@ public class UserController {
         }
         return this.userService.findUserByEmail(((UserPrinciple) principal.getPrincipal()).getEmail());
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(value = "/users")
+    public Set<User> listUsers() {
+        return this.userService.getUsers();
+    }
+
 
 
 }

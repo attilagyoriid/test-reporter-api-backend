@@ -1,7 +1,10 @@
 package com.ericsson.eea.rv.testreporter.testreporter.services;
 
+import com.ericsson.eea.rv.testreporter.testreporter.domain.PasswordResetToken;
 import com.ericsson.eea.rv.testreporter.testreporter.domain.User;
 import com.ericsson.eea.rv.testreporter.testreporter.domain.VerificationToken;
+
+import java.util.Set;
 
 
 public interface UserService {
@@ -14,6 +17,8 @@ public interface UserService {
 
     User findUserByUsername(String username);
 
+    Set<User> getUsers();
+
     boolean isUsernameExist(String username);
 
     boolean isEmailExist(String email);
@@ -21,9 +26,13 @@ public interface UserService {
 
     User getUserByVerificationToken(String verificationToken);
 
-    void createVerificationTokenForUser(User user, String token);
+    VerificationToken createVerificationTokenForUser(User user, String token);
 
     VerificationToken getVerificationToken(String VerificationToken);
 
     String validateVerificationToken(String token);
+
+    VerificationToken generateNewVerificationToken(String email);
+
+    PasswordResetToken createPasswordResetTokenForUser(User user, String token);
 }

@@ -1,13 +1,18 @@
 package com.ericsson.eea.rv.testreporter.testreporter.controllers.v1;
 
+import com.ericsson.eea.rv.testreporter.testreporter.domain.PasswordResetToken;
 import com.ericsson.eea.rv.testreporter.testreporter.domain.Role;
 import com.ericsson.eea.rv.testreporter.testreporter.domain.User;
+import com.ericsson.eea.rv.testreporter.testreporter.domain.VerificationToken;
 import com.ericsson.eea.rv.testreporter.testreporter.error.DetailedResponseMessage;
 import com.ericsson.eea.rv.testreporter.testreporter.exceptions.AlreadyExitException;
 import com.ericsson.eea.rv.testreporter.testreporter.security.emailVerification.event.OnRegistrationCompleteEvent;
+import com.ericsson.eea.rv.testreporter.testreporter.security.emailVerification.event.OnResendRegistrationTokenEvent;
+import com.ericsson.eea.rv.testreporter.testreporter.security.emailVerification.event.OnResetPasswordEvent;
 import com.ericsson.eea.rv.testreporter.testreporter.security.jwt.JwtProvider;
 import com.ericsson.eea.rv.testreporter.testreporter.security.response.JwtResponse;
 import com.ericsson.eea.rv.testreporter.testreporter.services.RoleService;
+import com.ericsson.eea.rv.testreporter.testreporter.services.UserSecurityService;
 import com.ericsson.eea.rv.testreporter.testreporter.services.UserService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
@@ -21,10 +26,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -38,12 +40,13 @@ public class AuthenticationController {
     private PasswordEncoder encoder;
     private ApplicationEventPublisher applicationEventPublisher;
     private MessageSource messageSource;
+    private UserSecurityService userSecurityService;
 
 
     public AuthenticationController(UserService userService, RoleService roleService,
                                     AuthenticationManager authenticationManager, JwtProvider jwtProvider,
                                     PasswordEncoder encoder, ApplicationEventPublisher applicationEventPublisher,
-                                    MessageSource messageSource) {
+                                    MessageSource messageSource, UserSecurityService userSecurityService) {
         this.userService = userService;
         this.roleService = roleService;
         this.authenticationManager = authenticationManager;
@@ -51,6 +54,7 @@ public class AuthenticationController {
         this.encoder = encoder;
         this.applicationEventPublisher = applicationEventPublisher;
         this.messageSource = messageSource;
+        this.userSecurityService = userSecurityService;
     }
 
     @PostMapping("/signup")
@@ -94,7 +98,7 @@ public class AuthenticationController {
         return new JwtResponse(jwt);
     }
 
-    @GetMapping("/regitrationConfirm")
+    @GetMapping("/registrationConfirm")
     public DetailedResponseMessage confirmRegistration
             (WebRequest request, @RequestParam("token") String token) {
 
@@ -102,13 +106,37 @@ public class AuthenticationController {
 
         final String result = userService.validateVerificationToken(token);
         String responseMessage = messageSource.getMessage("auth.message." + result, null, locale);
-        DetailedResponseMessage detailedResponseMessage = new DetailedResponseMessage(new Date(), responseMessage, Collections.emptyList());
 
-
-        return detailedResponseMessage;
-
-
+        return new DetailedResponseMessage(new Date(), responseMessage, Collections.emptyList());
     }
+
+    @GetMapping("/user/resendRegistrationToken")
+    public DetailedResponseMessage resendRegistrationToken(final HttpServletRequest request, @RequestParam("email") final String email) {
+        final VerificationToken newToken = userService.generateNewVerificationToken(email);
+        final User savedUser = userService.getUserByVerificationToken(newToken.getToken());
+        this.applicationEventPublisher.publishEvent(new OnResendRegistrationTokenEvent(savedUser, request.getLocale(), "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath(), newToken));
+        return new DetailedResponseMessage(new Date(), "Email verification re-sent", Collections.emptyList());
+    }
+
+    @GetMapping(value = "/user/resetPassword")
+    public DetailedResponseMessage resetPassword(final HttpServletRequest request, @RequestParam("email") final String userEmail) {
+        final User user = userService.findUserByEmail(userEmail);
+        final String tokenNew = UUID.randomUUID().toString();
+        PasswordResetToken passwordResetTokenForUser = userService.createPasswordResetTokenForUser(user, tokenNew);
+        this.applicationEventPublisher.publishEvent(new OnResetPasswordEvent(user, request.getLocale(), "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath(), passwordResetTokenForUser));
+
+        return new DetailedResponseMessage(new Date(), "Password reset sent", Collections.emptyList());
+    }
+
+    @GetMapping(value = "/user/changePassword")
+    public JwtResponse showChangePasswordPage(final Locale locale, @RequestParam("id") final long id, @RequestParam("token") final String token) {
+        userSecurityService.validatePasswordResetToken(id, token);
+        userSecurityService.deletePasswordResetToken(token);
+
+        String jwt = jwtProvider.generateJwtToken(SecurityContextHolder.getContext().getAuthentication());
+        return new JwtResponse(jwt);
+    }
+
 
 
 }

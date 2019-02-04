@@ -1,8 +1,10 @@
 package com.ericsson.eea.rv.testreporter.testreporter.services;
 
+import com.ericsson.eea.rv.testreporter.testreporter.domain.PasswordResetToken;
 import com.ericsson.eea.rv.testreporter.testreporter.domain.User;
 import com.ericsson.eea.rv.testreporter.testreporter.domain.VerificationToken;
 import com.ericsson.eea.rv.testreporter.testreporter.exceptions.NotFoundException;
+import com.ericsson.eea.rv.testreporter.testreporter.repositories.PasswordResetTokenRepository;
 import com.ericsson.eea.rv.testreporter.testreporter.repositories.UserRepository;
 import com.ericsson.eea.rv.testreporter.testreporter.repositories.VerificationTokenRepository;
 import org.springframework.context.MessageSource;
@@ -11,6 +13,10 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -23,11 +29,14 @@ public class UserServiceImpl implements UserService {
 
     private VerificationTokenRepository tokenRepository;
     private MessageSource messageSource;
+    private PasswordResetTokenRepository passwordResetTokenRepository;
 
-    public UserServiceImpl(UserRepository userRepository, VerificationTokenRepository tokenRepository, MessageSource messageSource) {
+    public UserServiceImpl(UserRepository userRepository, VerificationTokenRepository tokenRepository,
+                           MessageSource messageSource, PasswordResetTokenRepository passwordResetTokenRepository) {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.messageSource = messageSource;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
     @Override
@@ -52,6 +61,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Set<User> getUsers() {
+        return new HashSet<>(this.userRepository.findAll());
+    }
+
+    @Override
     public boolean isUsernameExist(String username) {
         return this.userRepository.findUserByUsername(username).isPresent();
     }
@@ -71,9 +85,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void createVerificationTokenForUser(final User user, final String token) {
+    public VerificationToken createVerificationTokenForUser(final User user, final String token) {
         final VerificationToken myToken = new VerificationToken(token, user);
-        tokenRepository.save(myToken);
+        return tokenRepository.save(myToken);
     }
 
     @Override
@@ -99,8 +113,28 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setEnabled(true);
-        // tokenRepository.delete(verificationToken);
+        // tokenRepository.delete(passwordResetToken);
         userRepository.save(user);
         return TOKEN_VALID;
+    }
+
+    @Override
+    public VerificationToken generateNewVerificationToken(final String email) {
+        User userByEmail = this.findUserByEmail(email);
+        VerificationToken vToken = tokenRepository.findByUser(userByEmail);
+        if (vToken==null) {
+            vToken = this.createVerificationTokenForUser(userByEmail, UUID.randomUUID().toString());
+        } else {
+            vToken.updateToken(UUID.randomUUID()
+                    .toString());
+            vToken = tokenRepository.save(vToken);
+        }
+        return vToken;
+    }
+
+    @Override
+    public PasswordResetToken createPasswordResetTokenForUser(final User user, final String token) {
+        final PasswordResetToken myToken = new PasswordResetToken(token, user);
+        return passwordResetTokenRepository.save(myToken);
     }
 }
