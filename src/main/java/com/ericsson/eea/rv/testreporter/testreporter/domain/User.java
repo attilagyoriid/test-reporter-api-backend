@@ -2,6 +2,8 @@ package com.ericsson.eea.rv.testreporter.testreporter.domain;
 
 
 import com.ericsson.eea.rv.testreporter.testreporter.validation.ValidPassword;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -16,16 +18,19 @@ import java.util.Set;
 @Data
 @EqualsAndHashCode()
 @Table(name = "users")
+@ApiModel(description = "Information on User")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ApiModelProperty(notes = "First name of the User", required = true)
     @NotEmpty(message = "{user.firstname.notempty}")
     @Size(min = 2, message = "{user.firstname.size}")
     private String firstname;
 
+    @ApiModelProperty(notes = "Last name of the User", required = true)
     @NotEmpty(message = "{user.lastname.notempty}")
     @Size(min = 3, message = "{user.lastname.size}")
     private String lastname;
