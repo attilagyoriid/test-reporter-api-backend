@@ -54,7 +54,7 @@ public class RegistrationListener
         String recipientAddress = user.getEmail();
         String subject = "Registration Confirmation";
         String confirmationUrl
-                = event.getAppUrl() + "/api/v1/auth/regitrationConfirm?token=" + token;
+                = event.getAppUrl() + "/api/v1/auth/registrationConfirm?token=" + token;
         String message = messages.getMessage("message.regSucc", null, event.getLocale());
 
         SimpleMailMessage email = new SimpleMailMessage();

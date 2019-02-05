@@ -28,6 +28,7 @@ public class UserPrinciple implements UserDetails {
 
     @JsonIgnore
     private String password;
+
     private Boolean enabled;
 
     private Collection<? extends GrantedAuthority> authorities;
