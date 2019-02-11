@@ -38,7 +38,7 @@ jobs:
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
       # run tests!
-      - run: mvn integration-test
+      - run: mvn integration-test sonar:sonar -Dsonar.projectKey=attilagyoriid_test-reporter-api-backend -Dsonar.organization=attilagyoriid-github -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=c5bbf06e6fb99c5090238297384e8a000b79da03
 
       - store_test_results:
           path: target/surefire-reports
@@ -46,3 +46,6 @@ jobs:
       - run:
           name: Send to CodeCov
           command: bash <(curl -s https://codecov.io/bash)
+
+
+          mvn
