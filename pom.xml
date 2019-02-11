@@ -125,6 +125,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.ericsson.eea.rv.testreporter.testreporter.TestReporterApplication</mainClass>
+                </configuration>
             </plugin>
             <!--fix for issue with JDK 1.8 181 see: https://stackoverflow.com/questions/53010200/maven-surefire-could-not-find-forkedbooter-class-->
             <plugin>
@@ -194,7 +197,19 @@
                             </rules>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>jacoco-site</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.6.0.1398</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -209,4 +224,22 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>sonar</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <sonar.projectKey>
+                    attilagyoriid_test-reporter-api-backend
+                </sonar.projectKey>
+                <sonar.organization>attilagyoriid-github</sonar.organization>
+                <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+                <sonar.login>
+                    d61396e147bab59a0a4cb0f01eb14a3c3a4ffbf8
+                </sonar.login>
+            </properties>
+        </profile>
+    </profiles>
 </project>
