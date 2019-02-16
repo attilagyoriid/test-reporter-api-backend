@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/auth")
 public class AuthenticationController {
 
+    public static final String HTTP_PREFIX = "http://";
     private UserService userService;
     private RoleService roleService;
     private AuthenticationManager authenticationManager;
@@ -76,7 +77,7 @@ public class AuthenticationController {
 
         User savedUser = this.userService.save(userToSave);
 
-        this.applicationEventPublisher.publishEvent(new OnRegistrationCompleteEvent(savedUser, request.getLocale(), "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath()));
+        this.applicationEventPublisher.publishEvent(new OnRegistrationCompleteEvent(savedUser, request.getLocale(), HTTP_PREFIX + request.getServerName() + ":" + request.getServerPort() + request.getContextPath()));
 
         return new DetailedResponseMessage(new Date(), "Email verification sent", Collections.emptyList());
 
@@ -114,7 +115,7 @@ public class AuthenticationController {
     public DetailedResponseMessage resendRegistrationToken(final HttpServletRequest request, @RequestParam("email") final String email) {
         final VerificationToken newToken = userService.generateNewVerificationToken(email);
         final User savedUser = userService.getUserByVerificationToken(newToken.getToken());
-        this.applicationEventPublisher.publishEvent(new OnResendRegistrationTokenEvent(savedUser, request.getLocale(), "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath(), newToken));
+        this.applicationEventPublisher.publishEvent(new OnResendRegistrationTokenEvent(savedUser, request.getLocale(), HTTP_PREFIX + request.getServerName() + ":" + request.getServerPort() + request.getContextPath(), newToken));
         return new DetailedResponseMessage(new Date(), "Email verification re-sent", Collections.emptyList());
     }
 
@@ -123,7 +124,7 @@ public class AuthenticationController {
         final User user = userService.findUserByEmail(userEmail);
         final String tokenNew = UUID.randomUUID().toString();
         PasswordResetToken passwordResetTokenForUser = userService.createPasswordResetTokenForUser(user, tokenNew);
-        this.applicationEventPublisher.publishEvent(new OnResetPasswordEvent(user, request.getLocale(), "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath(), passwordResetTokenForUser));
+        this.applicationEventPublisher.publishEvent(new OnResetPasswordEvent(user, request.getLocale(), HTTP_PREFIX + request.getServerName() + ":" + request.getServerPort() + request.getContextPath(), passwordResetTokenForUser));
 
         return new DetailedResponseMessage(new Date(), "Password reset sent", Collections.emptyList());
     }

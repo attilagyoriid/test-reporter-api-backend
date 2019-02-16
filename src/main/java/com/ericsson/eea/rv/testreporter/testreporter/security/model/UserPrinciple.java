@@ -61,8 +61,8 @@ public class UserPrinciple implements UserDetails {
                 user.getEmail(),
                 user.getPassword(),
                 authorities,
-                user.getActive(),
-                user.getEnabled()
+                user.isActive(),
+                user.isEnabled()
         );
     }
 
@@ -100,6 +100,11 @@ public class UserPrinciple implements UserDetails {
     @Override
     public boolean isEnabled() {
         return enabled;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(active, username, firstname, lastname, email, password, enabled, authorities);
     }
 
     @Override

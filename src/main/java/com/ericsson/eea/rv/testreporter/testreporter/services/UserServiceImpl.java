@@ -39,6 +39,10 @@ public class UserServiceImpl implements UserService {
         this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
+    public UserServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @Override
     public User findUserByEmail(String email) {
         return this.userRepository.findUserByEmail(email).orElseThrow(() -> new NotFoundException("User Not found with email: " + email));
@@ -113,7 +117,6 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setEnabled(true);
-        // tokenRepository.delete(passwordResetToken);
         userRepository.save(user);
         return TOKEN_VALID;
     }

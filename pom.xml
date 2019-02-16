@@ -15,15 +15,22 @@
     <description>Test Reporter API for evaluating a reporting automated test run results</description>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>${maven-compiler-plugin.java.version}</java.version>
         <jacoco.maven.plugin>0.8.3</jacoco.maven.plugin>
-        <maven.failsafe.plugin>2.22.1</maven.failsafe.plugin>
-        <passay>1.4.0</passay>
+        <maven.failsafe.plugin>${maven-surefire-plugin.version}</maven.failsafe.plugin>
+        <passay>${junit-platform.version}</passay>
         <jjwt>0.9.1</jjwt>
         <springfox.swagger2>2.9.2</springfox.swagger2>
         <springfox.swagger.ui>2.9.2</springfox.swagger.ui>
         <springfox.core>2.9.2</springfox.core>
         <swagger.ui.webjars>3.20.3</swagger.ui.webjars>
+        <junit.jupiter.version>5.3.2</junit.jupiter.version>
+        <junit-platform.version>1.4.0</junit-platform.version>
+        <mockito-junit-jupiter.version>2.23.4</mockito-junit-jupiter.version>
+        <maven-surefire-plugin.version>2.22.1</maven-surefire-plugin.version>
+        <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
+        <maven-compiler-plugin.java.version>1.8</maven-compiler-plugin.java.version>
+        <junit-platform-surefire-provider.version>1.3.2</junit-platform-surefire-provider.version>
     </properties>
 
     <dependencies>
@@ -116,8 +123,42 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-engine</artifactId>
+            <version>${junit-platform.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>${junit-platform.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito-junit-jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -129,13 +170,29 @@
                     <mainClass>com.ericsson.eea.rv.testreporter.testreporter.TestReporterApplication</mainClass>
                 </configuration>
             </plugin>
-            <!--fix for issue with JDK 1.8 181 see: https://stackoverflow.com/questions/53010200/maven-surefire-could-not-find-forkedbooter-class-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
                 <configuration>
-                    <useSystemClassLoader>false</useSystemClassLoader>
+                    <includes>
+                        <include>**/*Tests.java</include>
+                        <include>**/*Test.java</include>
+                        <include>**/Test*.java</include>
+                    </includes>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.junit.platform</groupId>
+                        <artifactId>junit-platform-surefire-provider</artifactId>
+                        <version>${junit-platform-surefire-provider.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.junit.jupiter</groupId>
+                        <artifactId>junit-jupiter-engine</artifactId>
+                        <version>${junit.jupiter.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -178,17 +235,17 @@
                     </execution>
                     <execution>
                         <id>jacoco-check</id>
-                        <phase>test</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
                         <configuration>
                             <rules>
-                                <rule implementation="org.jacoco.maven.RuleConfiguration">
-                                    <element>BUNDLE</element>
+                                <rule>
+                                    <element>CLASS</element>
                                     <limits>
-                                        <limit implementation="org.jacoco.report.check.Limit">
-                                            <counter>INSTRUCTION</counter>
+                                        <limit>
+                                            <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
                                             <minimum>0.00</minimum>
                                         </limit>
@@ -214,12 +271,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <skipMain>true</skipMain>
-                    <skip>true</skip>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${maven-compiler-plugin.java.version}</source>
+                    <target>${maven-compiler-plugin.java.version}</target>
                 </configuration>
             </plugin>
         </plugins>

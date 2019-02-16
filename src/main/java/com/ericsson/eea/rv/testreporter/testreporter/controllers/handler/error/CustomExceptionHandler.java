@@ -77,21 +77,21 @@ public class CustomExceptionHandler {
     @ExceptionHandler({AccessDeniedException.class})
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     public DetailedResponseMessage handleAccessDeniedException(AccessDeniedException ex) {
-        return new DetailedResponseMessage(new Date(), "Access denied",
+        return new DetailedResponseMessage(new Date(), HttpStatus.FORBIDDEN.toString(),
                 Arrays.asList(ex.getLocalizedMessage() + "!!!!!"));
     }
 
     @ExceptionHandler({DisabledException.class})
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     public DetailedResponseMessage handleDisabledException(DisabledException ex) {
-        return new DetailedResponseMessage(new Date(), "Access denied",
+        return new DetailedResponseMessage(new Date(), HttpStatus.FORBIDDEN.toString(),
                 Arrays.asList(ex.getLocalizedMessage() + "!!!!!"));
     }
 
     @ExceptionHandler({BadCredentialsException.class})
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     public DetailedResponseMessage handleBadCredentialsException(BadCredentialsException ex) {
-        return new DetailedResponseMessage(new Date(), "Access denied",
+        return new DetailedResponseMessage(new Date(), HttpStatus.FORBIDDEN.toString(),
                 Arrays.asList(ex.getLocalizedMessage() + "!!!!!"));
     }
 }

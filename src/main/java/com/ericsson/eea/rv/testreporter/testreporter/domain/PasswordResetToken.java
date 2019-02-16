@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -12,7 +13,7 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode
 @ToString
-public class PasswordResetToken {
+public class PasswordResetToken implements Serializable {
 
     private static final int EXPIRATION = 60 * 24;
 

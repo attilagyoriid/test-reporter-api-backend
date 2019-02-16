@@ -35,7 +35,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("show/{id}")
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public User getUserById(@PathVariable("id") Long id) {
         return this.userService.findUserById(id);

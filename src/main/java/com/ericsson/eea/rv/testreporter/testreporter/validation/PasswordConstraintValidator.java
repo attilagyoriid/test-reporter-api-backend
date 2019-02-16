@@ -1,18 +1,17 @@
 package com.ericsson.eea.rv.testreporter.testreporter.validation;
 
 import com.ericsson.eea.rv.testreporter.testreporter.exceptions.CustomValidationException;
+import lombok.extern.slf4j.Slf4j;
 import org.passay.*;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
+@Slf4j
 public class PasswordConstraintValidator implements ConstraintValidator<ValidPassword, String> {
-    @Override
-    public void initialize(ValidPassword arg0) {
-    }
+
 
     @Override
     public boolean isValid(String password, ConstraintValidatorContext context) {
