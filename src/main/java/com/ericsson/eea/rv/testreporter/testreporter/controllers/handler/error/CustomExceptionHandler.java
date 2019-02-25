@@ -25,6 +25,9 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class CustomExceptionHandler {
+
+    public static final String EXCLAMATION = "!";
+
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     public DetailedResponseMessage handleNotFoundException(NotFoundException ex) {
@@ -54,9 +57,8 @@ public class CustomExceptionHandler {
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public DetailedResponseMessage handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
 
-        DetailedResponseMessage detailedResponseMessage = new DetailedResponseMessage(new Date(), "Validation Failed",
+        return new DetailedResponseMessage(new Date(), "Validation Failed",
                 ex.getBindingResult().getFieldErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).map(s -> s.split(",",-1)).flatMap(Arrays::stream).collect(Collectors.toList()));
-        return detailedResponseMessage;
     }
 
     @ExceptionHandler(CustomValidationException.class)
@@ -78,21 +80,21 @@ public class CustomExceptionHandler {
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     public DetailedResponseMessage handleAccessDeniedException(AccessDeniedException ex) {
         return new DetailedResponseMessage(new Date(), HttpStatus.FORBIDDEN.toString(),
-                Arrays.asList(ex.getLocalizedMessage() + "!!!!!"));
+                Arrays.asList(ex.getLocalizedMessage() + "!"));
     }
 
     @ExceptionHandler({DisabledException.class})
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     public DetailedResponseMessage handleDisabledException(DisabledException ex) {
         return new DetailedResponseMessage(new Date(), HttpStatus.FORBIDDEN.toString(),
-                Arrays.asList(ex.getLocalizedMessage() + "!!!!!"));
+                Arrays.asList(ex.getLocalizedMessage() + EXCLAMATION));
     }
 
     @ExceptionHandler({BadCredentialsException.class})
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     public DetailedResponseMessage handleBadCredentialsException(BadCredentialsException ex) {
         return new DetailedResponseMessage(new Date(), HttpStatus.FORBIDDEN.toString(),
-                Arrays.asList(ex.getLocalizedMessage() + "!!!!!"));
+                Arrays.asList(ex.getLocalizedMessage() + "!"));
     }
 }
 

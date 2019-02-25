@@ -1,4 +1,4 @@
-package com.ericsson.eea.rv.testreporter.testreporter.security.emailVerification.event;
+package com.ericsson.eea.rv.testreporter.testreporter.security.email_verification.event;
 
 import com.ericsson.eea.rv.testreporter.testreporter.domain.User;
 import lombok.Data;

@@ -1,9 +1,9 @@
-package com.ericsson.eea.rv.testreporter.testreporter.security.emailVerification.listener;
+package com.ericsson.eea.rv.testreporter.testreporter.security.email_verification.listener;
 
 import com.ericsson.eea.rv.testreporter.testreporter.domain.User;
-import com.ericsson.eea.rv.testreporter.testreporter.security.emailVerification.event.OnRegistrationCompleteEvent;
-import com.ericsson.eea.rv.testreporter.testreporter.security.emailVerification.event.OnResendRegistrationTokenEvent;
-import com.ericsson.eea.rv.testreporter.testreporter.security.emailVerification.event.OnResetPasswordEvent;
+import com.ericsson.eea.rv.testreporter.testreporter.security.email_verification.event.OnRegistrationCompleteEvent;
+import com.ericsson.eea.rv.testreporter.testreporter.security.email_verification.event.OnResendRegistrationTokenEvent;
+import com.ericsson.eea.rv.testreporter.testreporter.security.email_verification.event.OnResetPasswordEvent;
 import com.ericsson.eea.rv.testreporter.testreporter.services.UserService;
 import org.springframework.context.MessageSource;
 import org.springframework.context.event.EventListener;

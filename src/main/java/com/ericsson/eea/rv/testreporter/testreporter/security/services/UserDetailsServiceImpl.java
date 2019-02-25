@@ -4,7 +4,6 @@ import com.ericsson.eea.rv.testreporter.testreporter.security.model.UserPrincipl
 import com.ericsson.eea.rv.testreporter.testreporter.services.UserService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,8 +19,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String username)
-            throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) {
         return UserPrinciple.build(userService.findUserByUsername(username));
     }
 }

@@ -37,24 +37,24 @@ public class PopulateDB implements ApplicationListener<ContextRefreshedEvent> {
         user1.setActive(true);
         user1.setEmail("majom@majom.com");
         user1.setFirstname("Attila");
-        user1.setLastname("Gyori");
-        user1.setPassword("xxxx1-Nqwe");
+        user1.setLastname("Kedves");
+        user1.setPassword("xxxx1-Nqwe1");
         user1.setUsername("seggfejke");
 
         User user2 = new User();
         user2.setActive(false);
         user2.setEmail("feri@majom.com");
         user2.setFirstname("Feri");
-        user2.setLastname("Gyori");
-        user2.setPassword("xxxx1-Nqwe");
+        user2.setLastname("Keleti");
+        user2.setPassword("xxxx1-Nqwe2");
         user2.setUsername("seggfejke2");
 
         User user3 = new User();
         user3.setActive(false);
         user3.setEmail("zoli@majom.com");
         user3.setFirstname("Zoli");
-        user3.setLastname("Gyori");
-        user3.setPassword("xxxx1-Nqwe");
+        user3.setLastname("Nyugati");
+        user3.setPassword("xxxx1-Nqw3");
         user3.setUsername("seggfejkex");
 
         Role role1 = new Role(RoleType.ROLE_ADMIN);

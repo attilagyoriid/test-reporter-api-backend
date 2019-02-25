@@ -2,8 +2,6 @@ package com.ericsson.eea.rv.testreporter.testreporter.security.jwt;
 
 import com.ericsson.eea.rv.testreporter.testreporter.security.services.UserDetailsServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,7 +24,6 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
 
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
-
 
 
     @Override

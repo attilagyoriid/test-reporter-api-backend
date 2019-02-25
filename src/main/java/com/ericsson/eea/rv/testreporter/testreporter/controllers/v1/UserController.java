@@ -60,9 +60,6 @@ public class UserController {
     @GetMapping("/account")
     @ResponseStatus(HttpStatus.OK)
     public User getUserDetails(Authentication principal) {
-        if (principal.getPrincipal() == null) {
-            throw new RuntimeException("Not signed in");
-        }
         return this.userService.findUserByEmail(((UserPrinciple) principal.getPrincipal()).getEmail());
     }
 

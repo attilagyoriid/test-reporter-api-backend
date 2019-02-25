@@ -16,7 +16,6 @@ import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -95,8 +94,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public VerificationToken getVerificationToken(final String VerificationToken) {
-        return tokenRepository.findByToken(VerificationToken);
+    public VerificationToken getVerificationToken(final String verificationToken) {
+        return tokenRepository.findByToken(verificationToken);
     }
 
     @Override
@@ -125,7 +124,7 @@ public class UserServiceImpl implements UserService {
     public VerificationToken generateNewVerificationToken(final String email) {
         User userByEmail = this.findUserByEmail(email);
         VerificationToken vToken = tokenRepository.findByUser(userByEmail);
-        if (vToken==null) {
+        if (vToken == null) {
             vToken = this.createVerificationTokenForUser(userByEmail, UUID.randomUUID().toString());
         } else {
             vToken.updateToken(UUID.randomUUID()
