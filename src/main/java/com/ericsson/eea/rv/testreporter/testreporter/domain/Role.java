@@ -11,7 +11,6 @@ import java.io.Serializable;
 
 @Entity
 @Data
-@AllArgsConstructor
 @Table(name = "roles")
 @EqualsAndHashCode()
 @NoArgsConstructor

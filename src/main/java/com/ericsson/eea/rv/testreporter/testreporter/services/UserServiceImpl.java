@@ -7,6 +7,7 @@ import com.ericsson.eea.rv.testreporter.testreporter.exceptions.NotFoundExceptio
 import com.ericsson.eea.rv.testreporter.testreporter.repositories.PasswordResetTokenRepository;
 import com.ericsson.eea.rv.testreporter.testreporter.repositories.UserRepository;
 import com.ericsson.eea.rv.testreporter.testreporter.repositories.VerificationTokenRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
     private MessageSource messageSource;
     private PasswordResetTokenRepository passwordResetTokenRepository;
 
+    @Autowired
     public UserServiceImpl(UserRepository userRepository, VerificationTokenRepository tokenRepository,
                            MessageSource messageSource, PasswordResetTokenRepository passwordResetTokenRepository) {
         this.userRepository = userRepository;
@@ -117,6 +119,7 @@ public class UserServiceImpl implements UserService {
 
         user.setEnabled(true);
         userRepository.save(user);
+        tokenRepository.delete(verificationToken);
         return TOKEN_VALID;
     }
 

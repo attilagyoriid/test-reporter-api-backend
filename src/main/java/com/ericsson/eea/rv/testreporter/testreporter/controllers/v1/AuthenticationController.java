@@ -61,7 +61,7 @@ public class AuthenticationController {
     @PostMapping("/signup")
     public DetailedResponseMessage signUpUser(@Valid @RequestBody User user, HttpServletRequest request) {
 
-        Set<Role> roles = user.getRoles().stream().map(r -> this.roleService.findByRoleType(r.getRoleType())).collect(Collectors.toSet());
+        user.getRoles().stream().map(r -> this.roleService.findByRoleType(r.getRoleType())).collect(Collectors.toSet());
 
         if (this.userService.isEmailExist(user.getEmail())) {
             throw new AlreadyExitException("Email: " + user.getEmail() + " already reserved");
@@ -71,7 +71,7 @@ public class AuthenticationController {
             throw new AlreadyExitException("User Name: " + user.getUsername() + " already reserved");
         }
 
-        User userToSave = new User(user.getFirstname(), user.getLastname(), user.getUsername(), user.getEmail(), encoder.encode(user.getPassword()), roles);
+        User userToSave = new User(user.getFirstname(), user.getLastname(), user.getUsername(), user.getEmail(), encoder.encode(user.getPassword()), user.getRoles());
         userToSave.setActive(true);
         userToSave.setEnabled(false);
 
