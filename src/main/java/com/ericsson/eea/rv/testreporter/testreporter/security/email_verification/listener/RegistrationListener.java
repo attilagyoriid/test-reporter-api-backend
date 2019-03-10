@@ -1,5 +1,6 @@
 package com.ericsson.eea.rv.testreporter.testreporter.security.email_verification.listener;
 
+import com.ericsson.eea.rv.testreporter.testreporter.configuration.AppConfiguration;
 import com.ericsson.eea.rv.testreporter.testreporter.domain.User;
 import com.ericsson.eea.rv.testreporter.testreporter.security.email_verification.event.OnRegistrationCompleteEvent;
 import com.ericsson.eea.rv.testreporter.testreporter.security.email_verification.event.OnResendRegistrationTokenEvent;
@@ -19,16 +20,18 @@ public class RegistrationListener
 //        ApplicationListener<OnRegistrationCompleteEvent>
 {
 
+    private final AppConfiguration appConfiguration;
     private UserService userService;
 
     private MessageSource messages;
 
     private JavaMailSender mailSender;
 
-    public RegistrationListener(UserService userService, MessageSource messages, JavaMailSender mailSender) {
+    public RegistrationListener(UserService userService, MessageSource messages, JavaMailSender mailSender, AppConfiguration appConfiguration) {
         this.userService = userService;
         this.messages = messages;
         this.mailSender = mailSender;
+        this.appConfiguration = appConfiguration;
     }
 
     @EventListener
@@ -52,9 +55,9 @@ public class RegistrationListener
         userService.createVerificationTokenForUser(user, token);
 
         String recipientAddress = user.getEmail();
-        String subject = "Registration Confirmation";
+        String subject = appConfiguration.getAppName() + " Registration Confirmation";
         String confirmationUrl
-                = event.getAppUrl() + "/api/v1/auth/registrationConfirm?token=" + token;
+                = appConfiguration.getConfirmregistrationUrl() + "?token=" + token;
         String message = messages.getMessage("message.regSucc", null, event.getLocale());
 
         SimpleMailMessage email = new SimpleMailMessage();
