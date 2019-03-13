@@ -21,4 +21,6 @@ public class AppConfiguration {
     private String appName;
     @Value("${testreporter.app.confirmregistration.url}")
     private String confirmregistrationUrl;
+    @Value("${testreporter.emailFrom}")
+    private String emailFrom;
 }

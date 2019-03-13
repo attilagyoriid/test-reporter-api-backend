@@ -65,6 +65,7 @@ public class RegistrationListener
         email.setTo(recipientAddress);
         email.setSubject(subject);
         email.setText(message + " rn " + confirmationUrl);
+        email.setFrom(appConfiguration.getEmailFrom());
         mailSender.send(email);
     }
 
@@ -83,6 +84,7 @@ public class RegistrationListener
         email.setTo(recipientAddress);
         email.setSubject(subject);
         email.setText(message + " rn " + confirmationUrl);
+        email.setFrom(appConfiguration.getEmailFrom());
         mailSender.send(email);
     }
 
@@ -102,6 +104,7 @@ public class RegistrationListener
         email.setTo(recipientAddress);
         email.setSubject(subject);
         email.setText(message + " rn " + confirmationUrl);
+        email.setFrom(appConfiguration.getEmailFrom());
         mailSender.send(email);
 
     }
