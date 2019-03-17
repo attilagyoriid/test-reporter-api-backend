@@ -1,8 +1,8 @@
 package com.ericsson.eea.rv.testreporter.testreporter.controllers.v1;
 
 import com.ericsson.eea.rv.testreporter.testreporter.domain.PasswordResetToken;
-import com.ericsson.eea.rv.testreporter.testreporter.domain.Role;
 import com.ericsson.eea.rv.testreporter.testreporter.domain.User;
+import com.ericsson.eea.rv.testreporter.testreporter.domain.UserLogIn;
 import com.ericsson.eea.rv.testreporter.testreporter.domain.VerificationToken;
 import com.ericsson.eea.rv.testreporter.testreporter.error.DetailedResponseMessage;
 import com.ericsson.eea.rv.testreporter.testreporter.exceptions.AlreadyExitException;
@@ -16,17 +16,23 @@ import com.ericsson.eea.rv.testreporter.testreporter.services.UserSecurityServic
 import com.ericsson.eea.rv.testreporter.testreporter.services.UserService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Locale;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -42,12 +48,13 @@ public class AuthenticationController {
     private ApplicationEventPublisher applicationEventPublisher;
     private MessageSource messageSource;
     private UserSecurityService userSecurityService;
+    private JwtProvider tokenProvider;
 
 
     public AuthenticationController(UserService userService, RoleService roleService,
                                     AuthenticationManager authenticationManager, JwtProvider jwtProvider,
                                     PasswordEncoder encoder, ApplicationEventPublisher applicationEventPublisher,
-                                    MessageSource messageSource, UserSecurityService userSecurityService) {
+                                    MessageSource messageSource, UserSecurityService userSecurityService, JwtProvider tokenProvider) {
         this.userService = userService;
         this.roleService = roleService;
         this.authenticationManager = authenticationManager;
@@ -56,6 +63,7 @@ public class AuthenticationController {
         this.applicationEventPublisher = applicationEventPublisher;
         this.messageSource = messageSource;
         this.userSecurityService = userSecurityService;
+        this.tokenProvider = tokenProvider;
     }
 
     @PostMapping("/signup")
@@ -84,19 +92,21 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signin")
-    public JwtResponse signInUser(@Valid @RequestBody User user) {
+    public JwtResponse signInUser(@RequestBody UserLogIn userLogIn) {
+        User userByEmail = this.userService.findUserByEmail(userLogIn.getEmail());
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        user.getUsername(),
-                        user.getPassword()
+                        userByEmail.getUsername(),
+                        userLogIn.getPassword()
                 )
         );
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
         String jwt = jwtProvider.generateJwtToken(authentication);
-        return new JwtResponse(jwt);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        return new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities());
     }
 
     @GetMapping("/registrationConfirm")
@@ -135,9 +145,23 @@ public class AuthenticationController {
         userSecurityService.deletePasswordResetToken(token);
 
         String jwt = jwtProvider.generateJwtToken(SecurityContextHolder.getContext().getAuthentication());
-        return new JwtResponse(jwt);
+        return null;
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('READER') or hasRole('EVALUATOR')")
+    @GetMapping(value = "/user/refreshToken")
+    public JwtResponse refreshToken(final Locale locale, @RequestParam("token") final String token) {
+
+        String jwt = "";
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (token != null && tokenProvider.validateJwtToken(token)) {
+            jwt = jwtProvider.generateJwtToken(authentication);
+
+        }
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        return new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities());
+    }
 
 
 }

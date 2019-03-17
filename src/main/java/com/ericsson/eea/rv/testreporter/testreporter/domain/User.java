@@ -2,6 +2,7 @@ package com.ericsson.eea.rv.testreporter.testreporter.domain;
 
 
 import com.ericsson.eea.rv.testreporter.testreporter.validation.ValidPassword;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -46,10 +47,9 @@ public class User implements Serializable {
     private String email;
 
     @ValidPassword
-//    @JsonIgnore
     private String password;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 

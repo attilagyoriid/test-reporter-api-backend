@@ -15,22 +15,19 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 
 @Component
-public class RegistrationListener
-//        implements
-//        ApplicationListener<OnRegistrationCompleteEvent>
-{
+public class RegistrationListener {
 
     private final AppConfiguration appConfiguration;
     private UserService userService;
 
     private MessageSource messages;
 
-    private JavaMailSender mailSender;
+//    private JavaMailSender mailSender;
 
-    public RegistrationListener(UserService userService, MessageSource messages, JavaMailSender mailSender, AppConfiguration appConfiguration) {
+    public RegistrationListener(UserService userService, MessageSource messages, AppConfiguration appConfiguration) {
         this.userService = userService;
         this.messages = messages;
-        this.mailSender = mailSender;
+//        this.mailSender = mailSender;
         this.appConfiguration = appConfiguration;
     }
 
@@ -65,8 +62,8 @@ public class RegistrationListener
         email.setTo(recipientAddress);
         email.setSubject(subject);
         email.setText(message + " rn " + confirmationUrl);
-        email.setFrom(appConfiguration.getEmailFrom());
-        mailSender.send(email);
+        System.out.println(email.toString());
+//        mailSender.send(email);
     }
 
     private void constructResendVerificationTokenEmail(OnResendRegistrationTokenEvent event) {
@@ -84,8 +81,8 @@ public class RegistrationListener
         email.setTo(recipientAddress);
         email.setSubject(subject);
         email.setText(message + " rn " + confirmationUrl);
-        email.setFrom(appConfiguration.getEmailFrom());
-        mailSender.send(email);
+        System.out.println(email.toString());
+//        mailSender.send(email);
     }
 
     private void constructResetPasswordEmail(OnResetPasswordEvent event) {
@@ -104,8 +101,8 @@ public class RegistrationListener
         email.setTo(recipientAddress);
         email.setSubject(subject);
         email.setText(message + " rn " + confirmationUrl);
-        email.setFrom(appConfiguration.getEmailFrom());
-        mailSender.send(email);
+        System.out.println(email.toString());
+//        mailSender.send(email);
 
     }
 

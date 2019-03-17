@@ -4,6 +4,7 @@ import com.ericsson.eea.rv.testreporter.testreporter.error.DetailedResponseMessa
 import com.ericsson.eea.rv.testreporter.testreporter.exceptions.AlreadyExitException;
 import com.ericsson.eea.rv.testreporter.testreporter.exceptions.CustomValidationException;
 import com.ericsson.eea.rv.testreporter.testreporter.exceptions.NotFoundException;
+import org.h2.jdbc.JdbcSQLException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -94,8 +95,16 @@ public class CustomExceptionHandler {
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     public DetailedResponseMessage handleBadCredentialsException(BadCredentialsException ex) {
         return new DetailedResponseMessage(new Date(), HttpStatus.FORBIDDEN.toString(),
-                Arrays.asList(ex.getLocalizedMessage() + "!"));
+                Arrays.asList("Bad Credentials!"));
     }
+
+    @ExceptionHandler({JdbcSQLException.class})
+    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+    public DetailedResponseMessage handleSQLException(JdbcSQLException ex) {
+        return new DetailedResponseMessage(new Date(), HttpStatus.INTERNAL_SERVER_ERROR.toString(),
+                Arrays.asList("Internal Server Error!"));
+    }
+
 }
 
 
