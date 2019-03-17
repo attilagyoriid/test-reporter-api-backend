@@ -3,6 +3,7 @@ package com.ericsson.eea.rv.testreporter.testreporter.services;
 import com.ericsson.eea.rv.testreporter.testreporter.domain.PasswordResetToken;
 import com.ericsson.eea.rv.testreporter.testreporter.domain.User;
 import com.ericsson.eea.rv.testreporter.testreporter.domain.VerificationToken;
+import com.ericsson.eea.rv.testreporter.testreporter.exceptions.AlreadyExitException;
 import com.ericsson.eea.rv.testreporter.testreporter.exceptions.NotFoundException;
 import com.ericsson.eea.rv.testreporter.testreporter.repositories.PasswordResetTokenRepository;
 import com.ericsson.eea.rv.testreporter.testreporter.repositories.UserRepository;
@@ -126,6 +127,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public VerificationToken generateNewVerificationToken(final String email) {
         User userByEmail = this.findUserByEmail(email);
+        if (userByEmail.isEnabled()) {
+            throw new AlreadyExitException(messageSource.getMessage("auth.message.user.enabled", null, LocaleContextHolder.getLocale()));
+        }
         VerificationToken vToken = tokenRepository.findByUser(userByEmail);
         if (vToken == null) {
             vToken = this.createVerificationTokenForUser(userByEmail, UUID.randomUUID().toString());

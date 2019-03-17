@@ -73,7 +73,7 @@ public class RegistrationListener {
         String recipientAddress = user.getEmail();
         String subject = "Email verification re-sent";
         String confirmationUrl
-                = event.getAppUrl() + "/api/v1/auth/regitrationConfirm?token=" + event.getVerificationToken().getToken();
+                = appConfiguration.getConfirmregistrationUrl() + "?token=" + event.getVerificationToken().getToken();
         String message = messages.getMessage("message.regSucc", null, event.getLocale());
 
         SimpleMailMessage email = new SimpleMailMessage();

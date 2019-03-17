@@ -91,6 +91,14 @@ public class AuthenticationController {
 
     }
 
+    @GetMapping("/resendRegistrationToken")
+    public DetailedResponseMessage resendRegistrationToken(final HttpServletRequest request, @RequestParam("email") final String email) {
+        final VerificationToken newToken = userService.generateNewVerificationToken(email);
+        final User savedUser = userService.getUserByVerificationToken(newToken.getToken());
+        this.applicationEventPublisher.publishEvent(new OnResendRegistrationTokenEvent(savedUser, request.getLocale(), HTTP_PREFIX + request.getServerName() + ":" + request.getServerPort() + request.getContextPath(), newToken));
+        return new DetailedResponseMessage(new Date(), "Email verification re-sent", Collections.emptyList());
+    }
+
     @PostMapping("/signin")
     public JwtResponse signInUser(@RequestBody UserLogIn userLogIn) {
         User userByEmail = this.userService.findUserByEmail(userLogIn.getEmail());
@@ -121,15 +129,9 @@ public class AuthenticationController {
         return new DetailedResponseMessage(new Date(), responseMessage, Collections.emptyList());
     }
 
-    @GetMapping("/user/resendRegistrationToken")
-    public DetailedResponseMessage resendRegistrationToken(final HttpServletRequest request, @RequestParam("email") final String email) {
-        final VerificationToken newToken = userService.generateNewVerificationToken(email);
-        final User savedUser = userService.getUserByVerificationToken(newToken.getToken());
-        this.applicationEventPublisher.publishEvent(new OnResendRegistrationTokenEvent(savedUser, request.getLocale(), HTTP_PREFIX + request.getServerName() + ":" + request.getServerPort() + request.getContextPath(), newToken));
-        return new DetailedResponseMessage(new Date(), "Email verification re-sent", Collections.emptyList());
-    }
 
-    @GetMapping(value = "/user/resetPassword")
+
+    @GetMapping(value = "/resetPassword")
     public DetailedResponseMessage resetPassword(final HttpServletRequest request, @RequestParam("email") final String userEmail) {
         final User user = userService.findUserByEmail(userEmail);
         final String tokenNew = UUID.randomUUID().toString();
@@ -139,7 +141,7 @@ public class AuthenticationController {
         return new DetailedResponseMessage(new Date(), "Password reset sent", Collections.emptyList());
     }
 
-    @GetMapping(value = "/user/changePassword")
+    @GetMapping(value = "/changePassword")
     public JwtResponse showChangePasswordPage(final Locale locale, @RequestParam("id") final long id, @RequestParam("token") final String token) {
         userSecurityService.validatePasswordResetToken(id, token);
         userSecurityService.deletePasswordResetToken(token);
@@ -149,7 +151,7 @@ public class AuthenticationController {
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('READER') or hasRole('EVALUATOR')")
-    @GetMapping(value = "/user/refreshToken")
+    @GetMapping(value = "/refreshToken")
     public JwtResponse refreshToken(final Locale locale, @RequestParam("token") final String token) {
 
         String jwt = "";
