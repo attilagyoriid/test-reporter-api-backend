@@ -3,6 +3,7 @@ package com.ericsson.eea.rv.testreporter.testreporter.services;
 import com.ericsson.eea.rv.testreporter.testreporter.domain.PasswordResetToken;
 import com.ericsson.eea.rv.testreporter.testreporter.domain.User;
 import com.ericsson.eea.rv.testreporter.testreporter.repositories.PasswordResetTokenRepository;
+import com.ericsson.eea.rv.testreporter.testreporter.repositories.UserRepository;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -21,18 +22,20 @@ import java.util.Collections;
 public class UserSecurityServiceImpl implements UserSecurityService {
 
 
+    private UserRepository userRepository;
     private PasswordResetTokenRepository passwordTokenRepository;
     private MessageSource messageSource;
 
-    public UserSecurityServiceImpl(PasswordResetTokenRepository passwordTokenRepository, MessageSource messageSource) {
+    public UserSecurityServiceImpl(UserRepository userRepository, PasswordResetTokenRepository passwordTokenRepository, MessageSource messageSource) {
+        this.userRepository = userRepository;
         this.passwordTokenRepository = passwordTokenRepository;
         this.messageSource = messageSource;
     }
 
     @Override
-    public void validatePasswordResetToken(long id, String token) {
+    public void validatePasswordResetToken(String token) {
         final PasswordResetToken passToken = passwordTokenRepository.findByToken(token);
-        if ((passToken == null) || (passToken.getUser().getId() != id)) {
+        if ((passToken == null)) {
             throw new BadCredentialsException(messageSource.getMessage("auth.message.toke.invalid", null, LocaleContextHolder.getLocale()));
         }
 
@@ -41,11 +44,21 @@ public class UserSecurityServiceImpl implements UserSecurityService {
             this.passwordTokenRepository.delete(passToken);
             throw new BadCredentialsException(messageSource.getMessage("auth.message.toke.expired", null, LocaleContextHolder.getLocale()));
         }
+//
+//        final User user = passToken.getUser();
+//        final Authentication auth = new UsernamePasswordAuthenticationToken(user, null, Collections.singleton(new SimpleGrantedAuthority("CHANGE_PASSWORD_PRIVILEGE")));
+//        SecurityContextHolder.getContext().setAuthentication(auth);
 
+    }
+
+    @Override
+    public User getUserByPasswordResetToken(String token) {
+        final PasswordResetToken passToken = passwordTokenRepository.findByToken(token);
+        if ((passToken == null)) {
+            throw new BadCredentialsException(messageSource.getMessage("auth.message.toke.invalid", null, LocaleContextHolder.getLocale()));
+        }
         final User user = passToken.getUser();
-        final Authentication auth = new UsernamePasswordAuthenticationToken(user, null, Collections.singleton(new SimpleGrantedAuthority("CHANGE_PASSWORD_PRIVILEGE")));
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
+        return user;
     }
 
     @Override
@@ -53,6 +66,7 @@ public class UserSecurityServiceImpl implements UserSecurityService {
         final PasswordResetToken passToken = passwordTokenRepository.findByToken(token);
         this.passwordTokenRepository.delete(passToken);
     }
+
 
 
 }

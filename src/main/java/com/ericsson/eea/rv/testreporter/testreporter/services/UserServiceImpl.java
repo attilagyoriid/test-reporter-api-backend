@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
@@ -31,14 +32,16 @@ public class UserServiceImpl implements UserService {
     private VerificationTokenRepository tokenRepository;
     private MessageSource messageSource;
     private PasswordResetTokenRepository passwordResetTokenRepository;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, VerificationTokenRepository tokenRepository,
-                           MessageSource messageSource, PasswordResetTokenRepository passwordResetTokenRepository) {
+                           MessageSource messageSource, PasswordResetTokenRepository passwordResetTokenRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.messageSource = messageSource;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserServiceImpl(UserRepository userRepository) {
@@ -145,5 +148,12 @@ public class UserServiceImpl implements UserService {
     public PasswordResetToken createPasswordResetTokenForUser(final User user, final String token) {
         final PasswordResetToken myToken = new PasswordResetToken(token, user);
         return passwordResetTokenRepository.save(myToken);
+    }
+
+
+    @Override
+    public void changeUserPassword(final User user, final String password) {
+        user.setPassword(passwordEncoder.encode(password));
+        userRepository.save(user);
     }
 }

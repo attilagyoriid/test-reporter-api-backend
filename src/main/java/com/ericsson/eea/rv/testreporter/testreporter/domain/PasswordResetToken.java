@@ -11,8 +11,6 @@ import java.util.Date;
 
 @Entity
 @Data
-@EqualsAndHashCode
-@ToString
 public class PasswordResetToken implements Serializable {
 
     private static final int EXPIRATION = 60 * 24;

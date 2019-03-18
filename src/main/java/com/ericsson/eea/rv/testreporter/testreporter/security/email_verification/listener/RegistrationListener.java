@@ -59,6 +59,7 @@ public class RegistrationListener {
 
         SimpleMailMessage email = new SimpleMailMessage();
 
+        email.setFrom(appConfiguration.getEmailFrom());
         email.setTo(recipientAddress);
         email.setSubject(subject);
         email.setText(message + " rn " + confirmationUrl);
@@ -78,6 +79,7 @@ public class RegistrationListener {
 
         SimpleMailMessage email = new SimpleMailMessage();
 
+        email.setFrom(appConfiguration.getEmailFrom());
         email.setTo(recipientAddress);
         email.setSubject(subject);
         email.setText(message + " rn " + confirmationUrl);
@@ -93,11 +95,12 @@ public class RegistrationListener {
         String recipientAddress = user.getEmail();
         String subject = "Email password reset";
         String confirmationUrl
-                = event.getAppUrl() + "/api/v1/auth/changePassword?id=" + user.getId() + "&token=" + event.getPasswordResetToken().getToken();
+                = appConfiguration.getConfirmresetpasswordUrl() + "?token=" + event.getPasswordResetToken().getToken();
         String message = messages.getMessage("message.resetPassword", null, event.getLocale());
 
         SimpleMailMessage email = new SimpleMailMessage();
 
+        email.setFrom(appConfiguration.getEmailFrom());
         email.setTo(recipientAddress);
         email.setSubject(subject);
         email.setText(message + " rn " + confirmationUrl);

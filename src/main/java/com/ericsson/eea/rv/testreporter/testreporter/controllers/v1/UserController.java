@@ -1,6 +1,8 @@
 package com.ericsson.eea.rv.testreporter.testreporter.controllers.v1;
 
 import com.ericsson.eea.rv.testreporter.testreporter.domain.User;
+import com.ericsson.eea.rv.testreporter.testreporter.mapper.UserEntityDTOMapper;
+import com.ericsson.eea.rv.testreporter.testreporter.model.UserAccountDTO;
 import com.ericsson.eea.rv.testreporter.testreporter.security.model.UserPrinciple;
 import com.ericsson.eea.rv.testreporter.testreporter.services.UserService;
 import io.swagger.annotations.Api;
@@ -59,8 +61,9 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('READER') or hasRole('EVALUATOR')")
     @GetMapping("/account")
     @ResponseStatus(HttpStatus.OK)
-    public User getUserDetails(Authentication principal) {
-        return this.userService.findUserByEmail(((UserPrinciple) principal.getPrincipal()).getEmail());
+    public UserAccountDTO getUserDetails(Authentication principal) {
+        User userByEmail = this.userService.findUserByEmail(((UserPrinciple) principal.getPrincipal()).getEmail());
+        return UserEntityDTOMapper.INSTANCE.userEntityToUserAccountDTO(userByEmail);
     }
 
     @ApiOperation(value = "View a list of users",response = Iterable.class)

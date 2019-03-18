@@ -2,10 +2,13 @@ package com.ericsson.eea.rv.testreporter.testreporter.controllers.v1;
 
 import com.ericsson.eea.rv.testreporter.testreporter.domain.PasswordResetToken;
 import com.ericsson.eea.rv.testreporter.testreporter.domain.User;
-import com.ericsson.eea.rv.testreporter.testreporter.domain.UserLogIn;
+import com.ericsson.eea.rv.testreporter.testreporter.model.ChangePasswordDTO;
+import com.ericsson.eea.rv.testreporter.testreporter.model.PasswordResetDTO;
+import com.ericsson.eea.rv.testreporter.testreporter.model.UserLogInDTO;
 import com.ericsson.eea.rv.testreporter.testreporter.domain.VerificationToken;
 import com.ericsson.eea.rv.testreporter.testreporter.error.DetailedResponseMessage;
 import com.ericsson.eea.rv.testreporter.testreporter.exceptions.AlreadyExitException;
+import com.ericsson.eea.rv.testreporter.testreporter.security.email_verification.event.OnChangePasswordEvent;
 import com.ericsson.eea.rv.testreporter.testreporter.security.email_verification.event.OnRegistrationCompleteEvent;
 import com.ericsson.eea.rv.testreporter.testreporter.security.email_verification.event.OnResendRegistrationTokenEvent;
 import com.ericsson.eea.rv.testreporter.testreporter.security.email_verification.event.OnResetPasswordEvent;
@@ -16,7 +19,6 @@ import com.ericsson.eea.rv.testreporter.testreporter.services.UserSecurityServic
 import com.ericsson.eea.rv.testreporter.testreporter.services.UserService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -87,7 +89,9 @@ public class AuthenticationController {
 
         this.applicationEventPublisher.publishEvent(new OnRegistrationCompleteEvent(savedUser, request.getLocale(), HTTP_PREFIX + request.getServerName() + ":" + request.getServerPort() + request.getContextPath()));
 
-        return new DetailedResponseMessage(new Date(), "Email verification sent", Collections.emptyList());
+        String responseMessage = messageSource.getMessage("auth.message.registration.confirm.sent", null, request.getLocale());
+
+        return new DetailedResponseMessage(new Date(), responseMessage, Collections.emptyList());
 
     }
 
@@ -96,17 +100,19 @@ public class AuthenticationController {
         final VerificationToken newToken = userService.generateNewVerificationToken(email);
         final User savedUser = userService.getUserByVerificationToken(newToken.getToken());
         this.applicationEventPublisher.publishEvent(new OnResendRegistrationTokenEvent(savedUser, request.getLocale(), HTTP_PREFIX + request.getServerName() + ":" + request.getServerPort() + request.getContextPath(), newToken));
-        return new DetailedResponseMessage(new Date(), "Email verification re-sent", Collections.emptyList());
+        String responseMessage = messageSource.getMessage("auth.message.registration.confirm.resent", null, request.getLocale());
+
+        return new DetailedResponseMessage(new Date(), responseMessage, Collections.emptyList());
     }
 
     @PostMapping("/signin")
-    public JwtResponse signInUser(@RequestBody UserLogIn userLogIn) {
-        User userByEmail = this.userService.findUserByEmail(userLogIn.getEmail());
+    public JwtResponse signInUser(@RequestBody UserLogInDTO userLogInDTO) {
+        User userByEmail = this.userService.findUserByEmail(userLogInDTO.getEmail());
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         userByEmail.getUsername(),
-                        userLogIn.getPassword()
+                        userLogInDTO.getPassword()
                 )
         );
 
@@ -131,23 +137,28 @@ public class AuthenticationController {
 
 
 
-    @GetMapping(value = "/resetPassword")
-    public DetailedResponseMessage resetPassword(final HttpServletRequest request, @RequestParam("email") final String userEmail) {
-        final User user = userService.findUserByEmail(userEmail);
+    @PostMapping(value = "/sendResetPasswordLink")
+    public DetailedResponseMessage resetPassword(final HttpServletRequest request, @RequestBody final PasswordResetDTO passwordResetDTO) {
+        final User user = userService.findUserByEmail(passwordResetDTO.getEmail());
         final String tokenNew = UUID.randomUUID().toString();
         PasswordResetToken passwordResetTokenForUser = userService.createPasswordResetTokenForUser(user, tokenNew);
         this.applicationEventPublisher.publishEvent(new OnResetPasswordEvent(user, request.getLocale(), HTTP_PREFIX + request.getServerName() + ":" + request.getServerPort() + request.getContextPath(), passwordResetTokenForUser));
 
-        return new DetailedResponseMessage(new Date(), "Password reset sent", Collections.emptyList());
+        String responseMessage = messageSource.getMessage("auth.message.password.resetSent", null, request.getLocale());
+
+        return new DetailedResponseMessage(new Date(), responseMessage, Collections.emptyList());
     }
 
-    @GetMapping(value = "/changePassword")
-    public JwtResponse showChangePasswordPage(final Locale locale, @RequestParam("id") final long id, @RequestParam("token") final String token) {
-        userSecurityService.validatePasswordResetToken(id, token);
+    @PostMapping(value = "/changePassword")
+    public DetailedResponseMessage showChangePasswordPage(final HttpServletRequest request, @RequestParam("token") final String token, @RequestBody final ChangePasswordDTO changePasswordDTO) {
+        userSecurityService.validatePasswordResetToken(token);
+        User userByPasswordResetToken = userSecurityService.getUserByPasswordResetToken(token);
         userSecurityService.deletePasswordResetToken(token);
 
-        String jwt = jwtProvider.generateJwtToken(SecurityContextHolder.getContext().getAuthentication());
-        return null;
+        this.userService.changeUserPassword(userByPasswordResetToken, changePasswordDTO.getPassword());
+        String responseMessage = messageSource.getMessage("auth.message.password.changed", null, request.getLocale());
+
+        return new DetailedResponseMessage(new Date(), responseMessage, Collections.emptyList());
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('READER') or hasRole('EVALUATOR')")

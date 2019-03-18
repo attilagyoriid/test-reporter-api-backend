@@ -35,4 +35,6 @@ public interface UserService {
     VerificationToken generateNewVerificationToken(String email);
 
     PasswordResetToken createPasswordResetTokenForUser(User user, String token);
+
+    void changeUserPassword(User user, String password);
 }

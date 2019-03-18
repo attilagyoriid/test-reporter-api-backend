@@ -18,7 +18,6 @@ import java.util.Set;
 
 @Entity
 @Data
-@EqualsAndHashCode()
 @Table(name = "users")
 @ApiModel(description = "Information on User")
 public class User implements Serializable {

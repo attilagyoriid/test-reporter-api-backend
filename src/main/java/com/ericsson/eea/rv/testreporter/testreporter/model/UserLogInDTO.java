@@ -1,4 +1,4 @@
-package com.ericsson.eea.rv.testreporter.testreporter.domain;
+package com.ericsson.eea.rv.testreporter.testreporter.model;
 
 
 import io.swagger.annotations.ApiModel;
@@ -8,20 +8,19 @@ import lombok.EqualsAndHashCode;
 import java.io.Serializable;
 
 @Data
-@EqualsAndHashCode()
 @ApiModel(description = "Information on Log in User")
-public class UserLogIn implements Serializable {
+public class UserLogInDTO implements Serializable {
 
     private String email;
 
     private String password;
 
-    public UserLogIn(String email, String password) {
+    public UserLogInDTO(String email, String password) {
         this.email = email;
         this.password = password;
     }
 
-    public UserLogIn() {
+    public UserLogInDTO() {
 
     }
 }
