@@ -120,7 +120,7 @@ public class AuthenticationController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        return new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities());
+        return new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities(), userByEmail.getId());
     }
 
     @GetMapping("/registrationConfirm")
@@ -171,9 +171,12 @@ public class AuthenticationController {
             jwt = jwtProvider.generateJwtToken(authentication);
 
         }
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String userNameFromJwtToken = tokenProvider.getUserNameFromJwtToken(jwt);
 
-        return new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities());
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        User userByUsername = this.userService.findUserByUsername(userNameFromJwtToken);
+
+        return new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities(),userByUsername.getId());
     }
 
 
