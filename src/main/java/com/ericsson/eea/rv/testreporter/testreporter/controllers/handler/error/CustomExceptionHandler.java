@@ -4,7 +4,10 @@ import com.ericsson.eea.rv.testreporter.testreporter.error.DetailedResponseMessa
 import com.ericsson.eea.rv.testreporter.testreporter.exceptions.AlreadyExitException;
 import com.ericsson.eea.rv.testreporter.testreporter.exceptions.CustomValidationException;
 import com.ericsson.eea.rv.testreporter.testreporter.exceptions.NotFoundException;
-import org.h2.jdbc.JdbcSQLException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -59,7 +63,7 @@ public class CustomExceptionHandler {
     public DetailedResponseMessage handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
 
         return new DetailedResponseMessage(new Date(), "Validation Failed",
-                ex.getBindingResult().getFieldErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).map(s -> s.split(",",-1)).flatMap(Arrays::stream).collect(Collectors.toList()));
+                ex.getBindingResult().getFieldErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).map(s -> s.split(",", -1)).flatMap(Arrays::stream).collect(Collectors.toList()));
     }
 
     @ExceptionHandler(CustomValidationException.class)
@@ -74,37 +78,63 @@ public class CustomExceptionHandler {
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public DetailedResponseMessage handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
         return new DetailedResponseMessage(new Date(), "Malformed Json",
-                Arrays.asList("Json parse error"));
+                Collections.singletonList("Json parse error"));
     }
 
     @ExceptionHandler({AccessDeniedException.class})
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     public DetailedResponseMessage handleAccessDeniedException(AccessDeniedException ex) {
         return new DetailedResponseMessage(new Date(), HttpStatus.FORBIDDEN.toString(),
-                Arrays.asList(ex.getLocalizedMessage() + "!"));
+                Collections.singletonList(ex.getLocalizedMessage() + "EXCLAMATION"));
     }
 
     @ExceptionHandler({DisabledException.class})
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     public DetailedResponseMessage handleDisabledException(DisabledException ex) {
         return new DetailedResponseMessage(new Date(), HttpStatus.FORBIDDEN.toString(),
-                Arrays.asList(ex.getLocalizedMessage() + EXCLAMATION));
+                Collections.singletonList(ex.getLocalizedMessage() + EXCLAMATION));
     }
 
     @ExceptionHandler({BadCredentialsException.class})
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     public DetailedResponseMessage handleBadCredentialsException(BadCredentialsException ex) {
         return new DetailedResponseMessage(new Date(), HttpStatus.FORBIDDEN.toString(),
-                Arrays.asList("Bad Credentials!"));
+                Collections.singletonList("Bad Credentials" + EXCLAMATION));
     }
 
-    @ExceptionHandler({JdbcSQLException.class})
+    @ExceptionHandler({SQLException.class})
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    public DetailedResponseMessage handleSQLException(JdbcSQLException ex) {
+    public DetailedResponseMessage handleSQLException(SQLException ex) {
         return new DetailedResponseMessage(new Date(), HttpStatus.INTERNAL_SERVER_ERROR.toString(),
-                Arrays.asList("Internal Server Error!"));
+                Collections.singletonList("Internal Server Error" + EXCLAMATION));
     }
 
-}
+    @ExceptionHandler({ExpiredJwtException.class})
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+    public DetailedResponseMessage handleExpiredJwtException(ExpiredJwtException ex) {
+        return new DetailedResponseMessage(new Date(), HttpStatus.UNAUTHORIZED.toString(),
+                Collections.singletonList("Token has expired" + EXCLAMATION));
+    }
 
+    @ExceptionHandler({SignatureException.class})
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+    public DetailedResponseMessage handleSignatureException(SignatureException ex) {
+        return new DetailedResponseMessage(new Date(), HttpStatus.UNAUTHORIZED.toString(),
+                Collections.singletonList("Invalid token" + EXCLAMATION));
+    }
+
+    @ExceptionHandler({MalformedJwtException.class})
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+    public DetailedResponseMessage handleMalformedJwtException(MalformedJwtException ex) {
+        return new DetailedResponseMessage(new Date(), HttpStatus.UNAUTHORIZED.toString(),
+                Collections.singletonList("Invalid token" + EXCLAMATION));
+    }
+
+    @ExceptionHandler({UnsupportedJwtException.class})
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+    public DetailedResponseMessage handleUnsupportedJwtException(UnsupportedJwtException ex) {
+        return new DetailedResponseMessage(new Date(), HttpStatus.UNAUTHORIZED.toString(),
+                Collections.singletonList("Invalid token" + EXCLAMATION));
+    }
+}
 
