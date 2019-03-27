@@ -3,11 +3,8 @@ package com.ericsson.eea.rv.testreporter.testreporter.controllers.handler.error;
 import com.ericsson.eea.rv.testreporter.testreporter.error.DetailedResponseMessage;
 import com.ericsson.eea.rv.testreporter.testreporter.exceptions.AlreadyExitException;
 import com.ericsson.eea.rv.testreporter.testreporter.exceptions.CustomValidationException;
+import com.ericsson.eea.rv.testreporter.testreporter.exceptions.JWTTokenValidationException;
 import com.ericsson.eea.rv.testreporter.testreporter.exceptions.NotFoundException;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.UnsupportedJwtException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -31,7 +28,7 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class CustomExceptionHandler {
 
-    public static final String EXCLAMATION = "!";
+    private static final String EXCLAMATION = "!";
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
@@ -109,32 +106,11 @@ public class CustomExceptionHandler {
                 Collections.singletonList("Internal Server Error" + EXCLAMATION));
     }
 
-    @ExceptionHandler({ExpiredJwtException.class})
+    @ExceptionHandler({JWTTokenValidationException.class})
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-    public DetailedResponseMessage handleExpiredJwtException(ExpiredJwtException ex) {
+    public DetailedResponseMessage handleExpiredJwtException(JWTTokenValidationException ex) {
         return new DetailedResponseMessage(new Date(), HttpStatus.UNAUTHORIZED.toString(),
-                Collections.singletonList("Token has expired" + EXCLAMATION));
-    }
-
-    @ExceptionHandler({SignatureException.class})
-    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-    public DetailedResponseMessage handleSignatureException(SignatureException ex) {
-        return new DetailedResponseMessage(new Date(), HttpStatus.UNAUTHORIZED.toString(),
-                Collections.singletonList("Invalid token" + EXCLAMATION));
-    }
-
-    @ExceptionHandler({MalformedJwtException.class})
-    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-    public DetailedResponseMessage handleMalformedJwtException(MalformedJwtException ex) {
-        return new DetailedResponseMessage(new Date(), HttpStatus.UNAUTHORIZED.toString(),
-                Collections.singletonList("Invalid token" + EXCLAMATION));
-    }
-
-    @ExceptionHandler({UnsupportedJwtException.class})
-    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-    public DetailedResponseMessage handleUnsupportedJwtException(UnsupportedJwtException ex) {
-        return new DetailedResponseMessage(new Date(), HttpStatus.UNAUTHORIZED.toString(),
-                Collections.singletonList("Invalid token" + EXCLAMATION));
+                Collections.singletonList(ex.getMessage() + EXCLAMATION));
     }
 }
 

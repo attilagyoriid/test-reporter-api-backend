@@ -1,6 +1,7 @@
 package com.ericsson.eea.rv.testreporter.testreporter.security.jwt;
 
 
+import com.ericsson.eea.rv.testreporter.testreporter.exceptions.JWTTokenValidationException;
 import com.ericsson.eea.rv.testreporter.testreporter.security.model.UserPrinciple;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
@@ -34,22 +35,23 @@ public class JwtProvider {
     }
 
     public boolean validateJwtToken(String authToken) {
+        boolean returnState = false;
         try {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
-            return true;
+            returnState =  true;
         } catch (SignatureException e) {
-            log.error("Invalid JWT signature", e);
+            throw new JWTTokenValidationException("Invalid JWT signature", e);
         } catch (MalformedJwtException e) {
-            log.error("Invalid JWT token", e);
+            throw new JWTTokenValidationException("Invalid JWT token", e);
         } catch (ExpiredJwtException e) {
-            log.error("Expired JWT token", e);
+            throw new JWTTokenValidationException("Expired JWT token", e);
         } catch (UnsupportedJwtException e) {
-            log.error("Unsupported JWT token", e);
+            throw new JWTTokenValidationException("Unsupported JWT token", e);
         } catch (IllegalArgumentException e) {
-            log.error("JWT claims string is empty", e);
+            throw new JWTTokenValidationException("JWT claims string is empty", e);
         }
+        return returnState;
 
-        return false;
     }
 
     public String getUserNameFromJwtToken(String token) {
