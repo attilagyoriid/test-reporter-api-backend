@@ -21,15 +21,17 @@ public class UserAccountDTO implements Serializable {
     private Set<Role> roles = new HashSet<>();
     private boolean active;
     private boolean enabled;
+    private byte[] image;
 
 
-    public UserAccountDTO(String firstname, String lastname, String username, String email, String password, Set<Role> roles) {
+    public UserAccountDTO(String firstname, String lastname, String username, String email, String password, Set<Role> roles, byte[] image) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.username = username;
         this.email = email;
         this.password = password;
         this.roles = roles;
+        this.image = image;
     }
 
     public UserAccountDTO() {

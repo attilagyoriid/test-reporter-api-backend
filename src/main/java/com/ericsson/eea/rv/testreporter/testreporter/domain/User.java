@@ -45,6 +45,9 @@ public class User implements Serializable {
     @Size(min = 8, message = "{user.email.size}")
     private String email;
 
+    @Lob
+    private byte[] image;
+
     @ValidPassword
     private String password;
 
