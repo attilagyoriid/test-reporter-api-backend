@@ -63,7 +63,7 @@ public class PopulateDB implements ApplicationListener<ContextRefreshedEvent> {
         user2.setLastname("Keleti");
         user2.setPassword(encoder.encode("test"));
         user2.setUsername("test1");
-        user1.setImage(image);
+        user2.setImage(image);
 
         User user3 = new User();
         user3.setActive(false);
@@ -72,7 +72,7 @@ public class PopulateDB implements ApplicationListener<ContextRefreshedEvent> {
         user3.setLastname("Nyugati");
         user3.setPassword(encoder.encode("test"));
         user3.setUsername("test2");
-        user1.setImage(null);
+        user3.setImage(null);
 
         Role role1 = new Role(RoleType.ROLE_ADMIN);
         Role role2 = new Role(RoleType.ROLE_EVALUATOR);
