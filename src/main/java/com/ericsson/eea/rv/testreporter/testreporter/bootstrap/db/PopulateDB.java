@@ -55,6 +55,7 @@ public class PopulateDB implements ApplicationListener<ContextRefreshedEvent> {
         user1.setPassword(encoder.encode("test"));
         user1.setUsername("test");
         user1.setImage(image);
+        user1.setEnabled(true);
 
         User user2 = new User();
         user2.setActive(false);
